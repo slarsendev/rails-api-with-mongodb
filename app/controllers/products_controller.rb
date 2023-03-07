@@ -16,7 +16,7 @@ class ProductsController < ApplicationController
 
   def update
     if product.update(product_params)
-      render json: { product: @product, message: 'Product is updated successfully.' }, status: 200
+      render json: { product: @product, message: 'Product is updated successfully.' }, status: :ok
     else
       render json: { message: product.errors.full_messages }, status: :unprocessable_entity
     end
@@ -24,23 +24,37 @@ class ProductsController < ApplicationController
 
   def show
     if @product
-      render json: { product: @product }, status: 200
+      render json: { product: @product }, status: :ok
     else
-      render json: { message: product.errors.full_messages }, status: :unprocessable_entity
+      render json: { message: 'Product not found' }, status: :not_found
     end
   end
 
   def destroy
     if product.destroy
-      render json: { message: 'Product is deleted successfully.' }, status: 200
+      render json: { message: 'Product is deleted successfully.' }, status: :ok
     else
       render json: { message: product.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def calculate
+    @product = Product.find_by(calculate_params(params))
+    if @product
+      render json: { product_name: "#{@product.type} - #{@product.name.split.first}" }, status: :ok
+    else
+      render json: { message: 'Product not found' }, status: :not_found
     end
   end
 
   private
     def product_params
       params.require(:product).permit(:name, :length, :width, :height, :weight)
+    end
+
+    def calculate_params(params)
+      params = params.permit(:name, :length, :width, :height, :weight).to_h
+      Hash[params.map { |k,v| [k, v.to_i ]}]
     end
 
     def find_product
