@@ -6,7 +6,10 @@ namespace :db do
 			file = File.read('./products.json')
 			data_hash = JSON.parse(file)
 
-			Product.create!(data_hash['products'])
+			data_hash['products'].each do |product|
+			  p = Product.new(product)
+				p.save(validate: false)
+			end
 		end
 	end
 end
